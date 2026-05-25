@@ -36,13 +36,14 @@ The Microsoft templates support four backends from the same generated config dir
 Use a two-layer deployment:
 
 1. **Foundation IaC in Terraform**
-   - Generate CAF-compliant names for:
+   - Generate CAF-style names for:
      - `rg-...` resource group
      - `kv-...` Key Vault
      - `id-...` user-assigned managed identity
      - `appi-...` Application Insights
      - `log-...` Log Analytics workspace
      - `sre-...` Azure SRE Agent
+   - Use workload, environment, and instance as the default naming tokens. Add region only when multi-region clarity, uniqueness, or a resource-specific convention requires it.
    - Create the Key Vault and RBAC assignment for `Key Vault Secrets User`.
    - Create the Log Analytics Workspace and attach Application Insights to it.
    - Create the SRE Agent with the managed identity and Application Insights reference. The Log Analytics Workspace is not expected to be referenced directly by the SRE Agent deployment unless the current API requires it.
@@ -70,7 +71,17 @@ This keeps infrastructure declarative while acknowledging that several SRE Agent
 
 ## CAF naming considerations
 
-Microsoft CAF naming guidance uses resource-type abbreviations plus workload, environment, region, and instance tokens. The relevant CAF abbreviations are:
+Microsoft CAF naming guidance lists region as an example naming component, not a required component for every resource. Microsoft examples include region for some resource types, such as networking resources and managed identities, and omit it for others, such as resource groups.
+
+The repo default is therefore:
+
+`<resource-abbreviation>-<workload>-<environment>-<instance>`
+
+Use this region-aware variant when it adds value:
+
+`<resource-abbreviation>-<workload>-<environment>-<region>-<instance>`
+
+The relevant CAF abbreviations are:
 
 | Resource | CAF abbreviation |
 |---|---|
@@ -80,7 +91,7 @@ Microsoft CAF naming guidance uses resource-type abbreviations plus workload, en
 | Application Insights | `appi` |
 | Log Analytics workspace | `log` |
 
-Azure SRE Agent is new enough that the CAF abbreviation table might not yet include a dedicated abbreviation for `Microsoft.App/agents`. Until there is an official abbreviation, use the repo-local convention `sre-<workload>-<env>-<region>-<###>` and document that exception.
+Azure SRE Agent is new enough that the CAF abbreviation table might not yet include a dedicated abbreviation for `Microsoft.App/agents`. Until there is an official abbreviation, use the repo-local convention `sre-<workload>-<env>-<###>` by default, or `sre-<workload>-<env>-<region>-<###>` for multi-region deployments.
 
 ## Implementation shape
 
@@ -131,6 +142,7 @@ PowerShell can host steps 2-4 if that is the most ergonomic local experience, bu
 - `overview.md` is persistent knowledge and belongs under `data/knowledge/overview.md`.
 - The repo should start from the Microsoft `minimal` recipe.
 - Current Microsoft guidance still requires a data-plane phase for hooks, knowledge files, repositories, HTTP triggers, and plugin configurations.
+- Region is optional in names; use it only when it adds operational clarity or avoids ambiguity.
 
 ## Remaining implementation validation
 
