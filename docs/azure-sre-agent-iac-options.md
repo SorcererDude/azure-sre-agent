@@ -42,9 +42,10 @@ Use a two-layer deployment:
      - `id-...` user-assigned managed identity
      - `appi-...` Application Insights
      - `log-...` Log Analytics workspace
+     - `sre-...` Azure SRE Agent
    - Create the Key Vault and RBAC assignment for `Key Vault Secrets User`.
    - Create or pass through the managed identity, Log Analytics workspace, and Application Insights resources.
-   - Deploy the SRE Agent using the Microsoft Terraform backend or a thin Terraform wrapper around the generated config.
+   - Deploy the SRE Agent using the Microsoft Terraform backend or a thin Terraform module around the generated config.
 
 2. **Agent config/data-plane layer**
    - Store skills under `config/skills/`.
@@ -53,7 +54,7 @@ Use a two-layer deployment:
    - Store persistent knowledge such as `overview.md` under `data/knowledge/` or the repo's chosen source folder, then upload it during the post-deploy phase.
    - Start the initial thread as an explicit post-deploy step, after the agent endpoint is available.
 
-This keeps infrastructure declarative while acknowledging that several SRE Agent capabilities are still data-plane operations.
+This keeps infrastructure declarative while acknowledging that several SRE Agent capabilities are still data-plane operations. Terraform should be the deployment engine for the foundation layer; PowerShell is optional as a convenience wrapper for Windows users or post-deploy data-plane calls, not a requirement for running Terraform.
 
 ## Important findings from the Microsoft templates
 
@@ -77,7 +78,7 @@ Microsoft CAF naming guidance uses resource-type abbreviations plus workload, en
 | Application Insights | `appi` |
 | Log Analytics workspace | `log` |
 
-Azure SRE Agent is new enough that the CAF abbreviation table might not yet include a dedicated abbreviation for `Microsoft.App/agents`. Until there is an official abbreviation, use a repo-local convention such as `srea-<workload>-<env>-<region>-<###>` and document that exception.
+Azure SRE Agent is new enough that the CAF abbreviation table might not yet include a dedicated abbreviation for `Microsoft.App/agents`. Until there is an official abbreviation, use the repo-local convention `sre-<workload>-<env>-<region>-<###>` and document that exception.
 
 ## Implementation shape
 
@@ -105,7 +106,7 @@ agent/
     knowledge/
       overview.md
 scripts/
-  deploy-agent-config.ps1
+  apply-agent-config.ps1
   start-initial-thread.ps1
 docs/
   azure-sre-agent-iac-options.md
@@ -113,11 +114,12 @@ docs/
 
 Suggested deployment order:
 
-1. Terraform applies resource group, Key Vault, identity, RBAC, Log Analytics, and Application Insights.
-2. Terraform or the Microsoft template backend creates the SRE Agent with the managed identity and telemetry resources.
-3. A post-deploy script runs `apply-extras` or equivalent API calls for knowledge files, hooks, and any data-plane-only configuration.
-4. Verification runs against the live agent.
-5. A final post-deploy script starts the first thread with the required prompt.
+1. Run Terraform directly from local development or CI/CD to create the resource group, Key Vault, identity, RBAC, Log Analytics, Application Insights, and SRE Agent.
+2. Run the Microsoft template `apply-extras` flow or equivalent API calls for knowledge files, hooks, and any data-plane-only configuration.
+3. Verify the live agent configuration.
+4. Start the first thread with the required prompt as a final post-deploy action.
+
+PowerShell can host steps 2-4 if that is the most ergonomic local experience, but the Terraform layer should remain plain Terraform so it can also run cleanly in GitHub Actions, Azure DevOps, or any other CI runner.
 
 ## Open items to validate before implementation
 
