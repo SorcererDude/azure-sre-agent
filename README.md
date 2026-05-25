@@ -17,6 +17,11 @@ This repo captures deployment and operational runbooks for Azure SRE Agent using
    - Windows/PowerShell-first setup guide.
    - Installs or validates tools such as Git, Azure CLI, Terraform, PowerShell 7, jq, and access to the Microsoft SRE Agent templates.
 
+4. [Azure Monitor alert fatigue scheduled tasks](docs/azure-monitor-alert-fatigue-scheduled-tasks.md)
+   - Documents the scheduled-task portion of Microsoft's Azure Monitor alert-fatigue solution.
+   - Adds weekly alert hygiene and monthly threshold audit task definitions under `agent/automations/scheduled-tasks/`.
+   - Tracks incident response plan configuration as a future TODO.
+
 ## Design decisions
 
 - Use the Microsoft `minimal` recipe as the base and add repo-owned skills, hooks, scheduled tasks, and persistent knowledge explicitly.
