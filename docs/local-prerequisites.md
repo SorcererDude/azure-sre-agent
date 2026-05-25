@@ -32,6 +32,8 @@ Azure permissions required by Microsoft guidance:
 - Owner on the subscription, or
 - Contributor plus User Access Administrator.
 
+The deployer/current user also needs `Azure SRE Agent Administrator` on the SRE Agent resource group. This allows data-plane controls to work after the ARM/Terraform deployment, including hooks and persistent knowledge upload.
+
 The deployment identity needs permission to:
 
 - Create resource groups and resources.
@@ -193,7 +195,7 @@ terraform -chdir=infra/terraform plan -var-file=environments/dev.tfvars
 | Symptom | Likely fix |
 |---|---|
 | `terraform` not recognized | Reopen PowerShell or check PATH after installing Terraform. |
-| `az login` works but data-plane extras are skipped | Run `az login --scope "https://azuresre.dev/.default"` and retry extras. |
+| `az login` works but data-plane extras are skipped | Run `az login --scope "https://azuresre.dev/.default"`, confirm the deployer has `Azure SRE Agent Administrator` on the resource group, and retry extras. |
 | Role assignments fail | Confirm the deployment identity has Owner or User Access Administrator. |
 | Microsoft scripts cannot find `jq` or Python | Reopen PowerShell and rerun the validation commands. |
 | Secrets appear in export files | Stop and redact before committing; use Key Vault or CI/CD secrets instead. |
