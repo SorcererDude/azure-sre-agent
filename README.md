@@ -22,6 +22,11 @@ This repo captures deployment and operational runbooks for Azure SRE Agent using
    - Adds weekly alert hygiene and monthly threshold audit task definitions under `agent/automations/scheduled-tasks/`.
    - Tracks incident response plan configuration as a future TODO.
 
+5. [Plugin marketplace solution](docs/plugin-marketplace-solution.md)
+   - Documents how to publish optional reusable config as marketplace plugins.
+   - Lets any SRE Agent Administrator choose workload-specific add-ons based on their own requirements.
+   - Uses `sap-hana-incident-triage` as an example of a plugin that should be optional rather than baseline.
+
 ## Design decisions
 
 - Use the Microsoft `minimal` recipe as the base and add repo-owned skills, hooks, scheduled tasks, and persistent knowledge explicitly.
@@ -30,6 +35,7 @@ This repo captures deployment and operational runbooks for Azure SRE Agent using
 - Assign the deployer/current user `Azure SRE Agent Administrator` on the SRE Agent resource group so data-plane controls can apply successfully.
 - Use `sre-<workload>-<env>-<###>` as the default repo-local Azure SRE Agent naming convention until CAF publishes an official abbreviation for `Microsoft.App/agents`.
 - Use a region token only when it adds value, such as multi-region deployments, globally unique names, or resources where CAF examples include region.
+- Use the plugin marketplace for optional workload-specific skills and connectors; keep required baseline behavior under `agent/`.
 
 ## Reference
 
