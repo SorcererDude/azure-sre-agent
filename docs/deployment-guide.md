@@ -48,7 +48,20 @@ Because of that split, avoid forcing everything into Terraform with brittle `loc
 
 ## Naming convention
 
-Use CAF-style abbreviations and a consistent token order.
+Use CAF-style abbreviations and a consistent token order. CAF lists region as a useful naming component, but not a universal requirement. The default convention in this repo omits region to keep names shorter; add a region token when it improves clarity or uniqueness, especially for multi-region deployments.
+
+Default patterns:
+
+| Resource | Pattern |
+|---|---|
+| Resource group | `rg-<workload>-<env>-<###>` |
+| Key Vault | `kv-<workload>-<env>-<###>` |
+| User-assigned managed identity | `id-<workload>-<env>-<###>` |
+| Log Analytics workspace | `log-<workload>-<env>-<###>` |
+| Application Insights | `appi-<workload>-<env>-<###>` |
+| Azure SRE Agent | `sre-<workload>-<env>-<###>` |
+
+Optional region-aware patterns:
 
 | Resource | Pattern |
 |---|---|
@@ -106,7 +119,7 @@ Use this split:
 | `variables.tf` | Declares variable names, types, defaults, validations, and descriptions. |
 | `environments/dev.tfvars` | Stores non-secret dev values. |
 | `environments/prod.tfvars` | Stores non-secret prod values. |
-| `locals.tf` / `naming.tf` | Derives CAF names from workload, environment, location abbreviation, and instance. |
+| `locals.tf` / `naming.tf` | Derives CAF names from workload, environment, optional region abbreviation, and instance. |
 | CI/CD secret variables | Stores secrets and sensitive runtime values. |
 | `outputs.tf` | Exposes resource IDs needed by agent config and post-deploy scripts. |
 
@@ -116,9 +129,10 @@ Example `dev.tfvars`:
 workload     = "azsre"
 environment  = "dev"
 location     = "australiaeast"
-location_abbr = "aue"
 instance     = "001"
-target_resource_group_names = ["rg-example-app-dev-aue-001"]
+include_region_in_name = false
+# region_abbr = "aue" # enable only when include_region_in_name is true
+target_resource_group_names = ["rg-example-app-dev-001"]
 ```
 
 ## Deployment commands
