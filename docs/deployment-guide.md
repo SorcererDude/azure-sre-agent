@@ -29,7 +29,8 @@ Terraform should own these resources:
 | Resource group | Yes |
 | Key Vault | Yes |
 | User-assigned managed identity | Yes |
-| Key Vault Secrets User role assignment | Yes |
+| Key Vault Secrets User role assignment for the managed identity | Yes |
+| Azure SRE Agent Administrator role assignment for the deployer/current user on the resource group | Yes |
 | Log Analytics Workspace | Yes |
 | Application Insights | Yes, connected to the workspace |
 | Azure SRE Agent | Yes, using the Microsoft Terraform backend or `azapi` resource support |
@@ -45,6 +46,18 @@ Microsoft's IaC page says deployment currently happens in two phases:
 2. Data-plane phase: code repositories, hooks, HTTP triggers, knowledge files, and plugin configurations.
 
 Because of that split, avoid forcing everything into Terraform with brittle `local-exec` blocks. Use Terraform for the foundation and use the official `apply-extras` flow or a small PowerShell wrapper for data-plane work.
+
+## RBAC requirements
+
+The deployer/current user needs these permissions before deployment:
+
+- Owner on the subscription, or Contributor plus User Access Administrator, so Terraform can create resources and role assignments.
+- Azure SRE Agent Administrator on the target resource group, so Phase 2 data-plane controls can apply hooks, knowledge, repositories, plugin configuration, and similar extras.
+
+Terraform should also assign:
+
+- `Key Vault Secrets User` to the Azure SRE Agent user-assigned managed identity on the Key Vault.
+- `Azure SRE Agent Administrator` to the deployer/current user on the SRE Agent resource group if it is not already present.
 
 ## Naming convention
 
@@ -181,6 +194,7 @@ PowerShell should not hide Terraform behind a custom deployment framework. Keep 
 - Application Insights is connected to the Log Analytics Workspace.
 - SRE Agent uses the user-assigned managed identity.
 - Managed identity has `Key Vault Secrets User` on the Key Vault.
+- Deployer/current user has `Azure SRE Agent Administrator` on the SRE Agent resource group.
 - `overview.md` exists in persistent knowledge and is visible to the agent after apply-extras.
 - Skills are present and callable.
 - Hooks are present.
