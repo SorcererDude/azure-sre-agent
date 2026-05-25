@@ -161,13 +161,15 @@ From the Microsoft `sreagent-templates` directory:
   -Recipe minimal `
   -NonInteractive `
   -Set @{
-    agentName='sre-<workload>-<env>-<region>-<###>'
-    resourceGroup='rg-<workload>-<env>-<region>-<###>'
+    agentName='sre-<workload>-<env>-<###>'
+    resourceGroup='rg-<workload>-<env>-<###>'
     location='<azure-region>'
-    targetRGs='rg-<target-workload>-<env>-<region>-<###>'
+    targetRGs='rg-<target-workload>-<env>-<###>'
   } `
   -Output <path-to-this-repo>\agent
 ```
+
+Add a region token to names only when it improves clarity or uniqueness, such as `sre-<workload>-<env>-<region>-<###>` for multi-region deployments.
 
 After bootstrap, add repo-owned config:
 
