@@ -45,6 +45,7 @@ Use a two-layer deployment:
      - `sre-...` Azure SRE Agent
    - Use workload, environment, and instance as the default naming tokens. Add region only when multi-region clarity, uniqueness, or a resource-specific convention requires it.
    - Create the Key Vault and RBAC assignment for `Key Vault Secrets User`.
+   - Assign `Azure SRE Agent Administrator` to the deployer/current user on the SRE Agent resource group so Phase 2 data-plane controls can run.
    - Create the Log Analytics Workspace and attach Application Insights to it.
    - Create the SRE Agent with the managed identity and Application Insights reference. The Log Analytics Workspace is not expected to be referenced directly by the SRE Agent deployment unless the current API requires it.
    - Deploy the SRE Agent using the Microsoft Terraform backend or a thin Terraform module around the generated config.
@@ -65,6 +66,7 @@ This keeps infrastructure declarative while acknowledging that several SRE Agent
   - ARM infrastructure phase: resource group, UAMI, Log Analytics, Application Insights, SRE Agent, RBAC, connectors, skills, subagents, and tools.
   - Data-plane phase: code repositories, hooks, HTTP triggers, knowledge files, and plugin configurations.
 - The same generated config directory can be deployed through Bicep, Terraform, PowerShell, or `azd`.
+- `SRE Agent Administrator` is part of the role assignment set called out by Microsoft; the deployer/current user needs it on the resource group for data-plane controls.
 - The `minimal` recipe is the preferred starting point for this repo because it lets the repo define skills, hooks, scheduled tasks, and persistent knowledge explicitly.
 - The Azure Monitor recipe `azmon-lawappinsights` remains a useful reference because it shows Application Insights, Log Analytics, skills, hooks, and scheduled tasks together.
 - The templates include export, clone, diff, and verify scripts. The verify step matters for this workflow because data-plane pieces can be skipped when the deployment identity lacks the SRE Agent data-plane token.
@@ -142,6 +144,7 @@ PowerShell can host steps 2-4 if that is the most ergonomic local experience, bu
 - `overview.md` is persistent knowledge and belongs under `data/knowledge/overview.md`.
 - The repo should start from the Microsoft `minimal` recipe.
 - Current Microsoft guidance still requires a data-plane phase for hooks, knowledge files, repositories, HTTP triggers, and plugin configurations.
+- Deployer/current user needs `Azure SRE Agent Administrator` on the resource group for data-plane controls.
 - Region is optional in names; use it only when it adds operational clarity or avoids ambiguity.
 
 ## Remaining implementation validation
