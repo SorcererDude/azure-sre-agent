@@ -1,0 +1,31 @@
+metadata:
+  name: monthly-threshold-audit
+spec:
+  description: Monthly Azure Monitor alert threshold audit and tuning recommendations
+  schedule: 0 9 1 * *
+  prompt: |
+    Audit Azure Monitor alert rules for the agent's monitored subscriptions and resource groups.
+
+    Scope:
+    - Review the previous 30 days of Azure Monitor alert fires and telemetry where available.
+    - Use prior weekly alert hygiene reports and persistent knowledge if available.
+    - Focus on alert rules with recurring fires, high auto-resolution rates, stale thresholds, or severity mismatch.
+
+    For each candidate rule, report:
+    - Alert rule name and resource scope.
+    - Current severity, signal, aggregation, window, threshold, and dimensions if available.
+    - Recent alert-fire count and resolution pattern.
+    - Observed baseline and outlier behavior for the measured signal.
+    - Whether the current threshold is too sensitive, too loose, stale, or appropriate.
+    - Recommended threshold or rule-configuration change.
+    - Expected alert-volume reduction and operational risk.
+    - Evidence supporting the recommendation.
+    - Rollback guidance if the recommendation is applied.
+
+    Guardrails:
+    - Do not recommend changes that would hide critical incidents.
+    - Mark low-confidence recommendations for human review.
+    - Do not make changes automatically.
+    - Include Azure CLI or Terraform follow-up snippets only when the evidence is strong and the target rule is unambiguous.
+  enabled: true
+  mode: Review
