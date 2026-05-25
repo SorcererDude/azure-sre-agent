@@ -1,0 +1,27 @@
+metadata:
+  name: weekly-alert-hygiene-report
+spec:
+  description: Weekly Azure Monitor alert hygiene report for noisy and auto-resolving alert rules
+  schedule: 0 8 * * 1
+  prompt: |
+    Produce a weekly Azure Monitor alert hygiene report for the agent's monitored subscriptions and resource groups.
+
+    Scope:
+    - Review Azure Monitor alert activity from the last 7 days.
+    - Focus on alert rules that fired more than 3 times.
+    - Include fired, resolved, and auto-resolved alert patterns where data is available.
+
+    For each noisy or recurring alert rule, report:
+    - Alert rule name and resource scope.
+    - Severity and signal type.
+    - Number of fires in the last 7 days.
+    - Auto-resolution rate or recurring resolution pattern, if available.
+    - Whether repeated fires appear to represent one recurring issue or separate incidents.
+    - Likely cause of noise, such as threshold too low, missing dimension filter, stale rule, deployment-related pattern, or transient platform behavior.
+    - Recommended action: keep, tune threshold, add dimensions, split by severity, move to a different response plan, add cooldown/merge behavior, or retire the rule.
+    - Evidence used for the recommendation.
+
+    Prioritize the report by expected alert-noise reduction and operational risk.
+    Do not make changes automatically. Provide recommended next steps for human review.
+  enabled: true
+  mode: Review
