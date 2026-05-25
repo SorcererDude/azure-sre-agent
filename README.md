@@ -22,6 +22,7 @@ This repo captures deployment and operational runbooks for Azure SRE Agent using
 - Use the Microsoft `minimal` recipe as the base and add repo-owned skills, hooks, scheduled tasks, and persistent knowledge explicitly.
 - Treat `overview.md` as persistent knowledge under `data/knowledge/overview.md`.
 - Attach Log Analytics Workspace to Application Insights. The SRE Agent deployment should reference Application Insights for agent telemetry, not the workspace directly unless the current API requires it.
+- Assign the deployer/current user `Azure SRE Agent Administrator` on the SRE Agent resource group so data-plane controls can apply successfully.
 - Use `sre-<workload>-<env>-<###>` as the default repo-local Azure SRE Agent naming convention until CAF publishes an official abbreviation for `Microsoft.App/agents`.
 - Use a region token only when it adds value, such as multi-region deployments, globally unique names, or resources where CAF examples include region.
 
