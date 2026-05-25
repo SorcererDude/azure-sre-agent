@@ -10,6 +10,7 @@ Start here when working with this repo.
 | [Copy/export an Azure SRE Agent](export-copy-agent.md) | Capturing an existing live agent's config, reviewing it, and importing it into repo-managed files. |
 | [Local prerequisite setup](local-prerequisites.md) | Installing and validating local tools on Windows with PowerShell. |
 | [Azure Monitor alert fatigue scheduled tasks](azure-monitor-alert-fatigue-scheduled-tasks.md) | Configuring weekly alert hygiene and monthly threshold audit scheduled tasks from Microsoft's Azure Monitor alert-fatigue solution. |
+| [Plugin marketplace solution](plugin-marketplace-solution.md) | Publishing optional workload-specific skills and connector packages that any SRE Agent Administrator can choose to install. |
 
 ## Background
 
@@ -26,3 +27,4 @@ Start here when working with this repo.
 - Log Analytics Workspace is attached to Application Insights; the SRE Agent deployment references Application Insights for agent telemetry.
 - Azure SRE Agent resources use the repo-local naming prefix `sre` until CAF publishes an official abbreviation.
 - Azure Monitor alert-fatigue incident response plans are a future TODO; scheduled tasks are documented and represented as config files now.
+- Marketplace plugins are for optional capabilities, such as `sap-hana-incident-triage`, that SRE Agent Administrators can install based on their own requirements.
