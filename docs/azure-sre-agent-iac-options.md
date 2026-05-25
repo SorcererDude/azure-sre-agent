@@ -23,7 +23,7 @@ The Microsoft templates support four backends from the same generated config dir
 | 2. Create Key Vault with CAF name | Native | Native | Scripted | Needs template extension |
 | 3. Create user-assigned managed identity and assign Key Vault Secrets User | Native, strong dependency handling | Native, strong dependency handling | Scripted | Needs template extension |
 | 4. Create Application Insights with CAF name | Native | Native | Scripted | Template/env-driven |
-| 5. Create Log Analytics Workspace with CAF name | Native | Native | Scripted | Template/env-driven |
+| 5. Create Log Analytics Workspace with CAF name | Native; attach to Application Insights | Native; attach to Application Insights | Scripted | Template/env-driven |
 | 6. Create Azure SRE Agent with UAMI and App Insights | Supported through official Terraform backend / `azapi` | Official default | Supported PowerShell wrapper | Supported through `azd up` |
 | 7. Upload/configure skills | Config directory; apply via template/data-plane | Config directory; apply via template/data-plane | Config directory | Config directory |
 | 8. Update `overview.md` persistent memory | Data-plane knowledge upload | Data-plane knowledge upload | Data-plane script/API | Data-plane script/API |
@@ -44,14 +44,16 @@ Use a two-layer deployment:
      - `log-...` Log Analytics workspace
      - `sre-...` Azure SRE Agent
    - Create the Key Vault and RBAC assignment for `Key Vault Secrets User`.
-   - Create or pass through the managed identity, Log Analytics workspace, and Application Insights resources.
+   - Create the Log Analytics Workspace and attach Application Insights to it.
+   - Create the SRE Agent with the managed identity and Application Insights reference. The Log Analytics Workspace is not expected to be referenced directly by the SRE Agent deployment unless the current API requires it.
    - Deploy the SRE Agent using the Microsoft Terraform backend or a thin Terraform module around the generated config.
 
 2. **Agent config/data-plane layer**
+   - Use the Microsoft `minimal` recipe as the base.
    - Store skills under `config/skills/`.
    - Store hooks under `config/hooks/`.
    - Store scheduled tasks under `automations/scheduled-tasks/`.
-   - Store persistent knowledge such as `overview.md` under `data/knowledge/` or the repo's chosen source folder, then upload it during the post-deploy phase.
+   - Store `overview.md` under `data/knowledge/overview.md` and treat it as persistent knowledge.
    - Start the initial thread as an explicit post-deploy step, after the agent endpoint is available.
 
 This keeps infrastructure declarative while acknowledging that several SRE Agent capabilities are still data-plane operations. Terraform should be the deployment engine for the foundation layer; PowerShell is optional as a convenience wrapper for Windows users or post-deploy data-plane calls, not a requirement for running Terraform.
@@ -62,8 +64,8 @@ This keeps infrastructure declarative while acknowledging that several SRE Agent
   - ARM infrastructure phase: resource group, UAMI, Log Analytics, Application Insights, SRE Agent, RBAC, connectors, skills, subagents, and tools.
   - Data-plane phase: code repositories, hooks, HTTP triggers, knowledge files, and plugin configurations.
 - The same generated config directory can be deployed through Bicep, Terraform, PowerShell, or `azd`.
-- The Azure Monitor recipe `azmon-lawappinsights` is the closest starting point because it already targets Application Insights and Log Analytics and includes skills, hooks, and a scheduled task.
-- The `minimal` recipe is a better starting point if the repo should define everything from first principles and avoid sample operational behavior.
+- The `minimal` recipe is the preferred starting point for this repo because it lets the repo define skills, hooks, scheduled tasks, and persistent knowledge explicitly.
+- The Azure Monitor recipe `azmon-lawappinsights` remains a useful reference because it shows Application Insights, Log Analytics, skills, hooks, and scheduled tasks together.
 - The templates include export, clone, diff, and verify scripts. The verify step matters for this workflow because data-plane pieces can be skipped when the deployment identity lacks the SRE Agent data-plane token.
 
 ## CAF naming considerations
@@ -109,7 +111,9 @@ scripts/
   apply-agent-config.ps1
   start-initial-thread.ps1
 docs/
-  azure-sre-agent-iac-options.md
+  deployment-guide.md
+  export-copy-agent.md
+  local-prerequisites.md
 ```
 
 Suggested deployment order:
@@ -121,12 +125,17 @@ Suggested deployment order:
 
 PowerShell can host steps 2-4 if that is the most ergonomic local experience, but the Terraform layer should remain plain Terraform so it can also run cleanly in GitHub Actions, Azure DevOps, or any other CI runner.
 
-## Open items to validate before implementation
+## Validated decisions
 
-- Confirm whether the current SRE Agent ARM API supports supplying an existing Log Analytics workspace for agent telemetry in the same way it supports existing managed identity and existing agent Application Insights.
-- Confirm the current data-plane endpoint/API for creating the initial thread and whether it requires `Microsoft.App/agents/threads/write`.
-- Decide whether `overview.md` should be treated as persistent knowledge (`data/knowledge/overview.md`) or as a common prompt/system instruction. For "persistent memory", knowledge upload is the safer initial assumption.
-- Decide whether the repo should start from `azmon-lawappinsights` or `minimal`. For this workflow, `minimal` plus explicit repo-owned skills/hooks/tasks is cleaner; `azmon-lawappinsights` is faster if its defaults are acceptable.
+- Log Analytics Workspace is created for Application Insights and attached to Application Insights. It is not modeled as a direct SRE Agent input unless the API requires it.
+- `overview.md` is persistent knowledge and belongs under `data/knowledge/overview.md`.
+- The repo should start from the Microsoft `minimal` recipe.
+- Current Microsoft guidance still requires a data-plane phase for hooks, knowledge files, repositories, HTTP triggers, and plugin configurations.
+
+## Remaining implementation validation
+
+- Confirm the current data-plane endpoint/API for creating the initial thread and its required permissions.
+- Confirm exact provider/API shape for `Microsoft.App/agents` at implementation time.
 
 ## Sources
 
